@@ -13,6 +13,8 @@ versions. During replication, information can be filtered and modified, and depl
 cloud-based databases. For performance, Tungsten Replicator includes support for parallel replication, and advanced 
 topologies such as fan-in and multi-master, and can be used efficiently in cross-site deployments.
 
+Tungsten Replicator developed is handled by Continuent Ltd, See [Tungsten Replicator](http://github.com/continuent/tungsten-replicator)
+
 ## 2 LICENSING
 
 This software is released under the Apache 2.0 license, a copy of which is located in the LICENSE file.  
@@ -38,7 +40,7 @@ Currently there are no builds from the new code available, they will be made ava
 
 ##5 DOCUMENTATION
 
-Documentation for Tungsten Replicator is located [on the VMware website]( http://pubs.vmware.com/continuent/tungsten-replicator-5.0-oss/).
+Documentation for Tungsten Replicator is located [on the Continuent website]( http://docs.continuent.com/).
 
 ##6 INSTALLATION
 
