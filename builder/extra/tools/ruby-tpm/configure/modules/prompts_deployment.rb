@@ -2140,8 +2140,6 @@ class HostServiceControlType < ConfigurePrompt
         service = cmd_result("ls /usr/sbin/service")
       rescue CommandError
         service = nil
-        puts
-
       end
     end
     
@@ -2152,7 +2150,6 @@ class HostServiceControlType < ConfigurePrompt
     end
     @default = @default.uniq().sort()
   end
-
 end
 
 class HostPortsForUsers < ConfigurePrompt

@@ -110,7 +110,7 @@ class ConfigurePrompt
       value = get_value(false)
       if value.to_s() == ""
         if get_disabled_value() == nil
-          # The prompt is disab led, no value should be given
+          # The prompt is disabled, no value should be given
         elsif required?()
           error("Value is missing")
         end

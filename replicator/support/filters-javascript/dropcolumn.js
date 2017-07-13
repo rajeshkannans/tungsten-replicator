@@ -73,7 +73,6 @@ function prepare()
 function filter(event)
 {
 
-//	throw new java.lang.Exception("I am done");
     try{
         data = event.getData();
         var dataToDrop = new Array();
@@ -112,7 +111,7 @@ function filter(event)
     }
     catch(err)
     {
-        logger.info(err.toString());
+        logger.error(err.toString());
     }
 }
 
@@ -121,10 +120,6 @@ function filter(event)
  */
 function isDrop(schema, table, col)
 {
-    logger.info("called" );
-//	logger.info("json " + JSON.stringify(schema));
-//	logger.info("json " + JSON.stringify(table));
-//	logger.info("json " + JSON.stringify(col));
     for (var def in definitions)
     {
         var drop = definitions[def];
@@ -135,7 +130,6 @@ function isDrop(schema, table, col)
                 var cols = drop["columns"];
                 for (var cl in cols)
                 {
-                    logger.info("col cl index = "+ cl + " val cols[cl] = " + cols[cl]  + "  given col " + col );
                     if(col == null)
                     {
                         throw new com.continuent.tungsten.replicator.ReplicatorException(
@@ -153,13 +147,11 @@ function isDrop(schema, table, col)
             }
         }
     }
-    logger.info("no drop here");
     return false;
 }
 
 function filterRowChangeData(d)
 {
-    logger.info("inside the method filterRowChangeData");
     rowChanges = d.getRowChanges();
     var rowToDrop = new Array();
     for(var j = 0; j < rowChanges.size(); j++)
@@ -168,24 +160,17 @@ function filterRowChangeData(d)
         var schema = oneRowChange.getSchemaName();
         var table = oneRowChange.getTableName();
         var columns = oneRowChange.getColumnSpec();
-
-        logger.info("raj table name = " + table + "schema = " + schema);
         // Drop column values.
         var columnValues = oneRowChange.getColumnValues();
         var specToDrop = new Array();
-        logger.info("raj columnValues size = " + columnValues.size());
         if(columnValues.size() >0 ) {
             for (var r = 0; r < columnValues.size(); r++) {
-                logger.info("raj columns.size() = " + columns.size());
                 for (c = columns.size() - 1; c >= 0; c--) {
                     columnSpec = columns.get(c);
                     colName = columnSpec.getName();
-                    logger.info("another isDrop caller place " + colName);
                     if (isDrop(schema, table, colName)) {
                         columnValues.get(r).remove(c);
-                        logger.info("col to drop " + c.toString());
                         if (specToDrop.indexOf(c) < 0) {
-                            logger.info("spec to drop " + c.toString());
                             specToDrop[specToDrop.length] = c;
                         }
                     }
@@ -194,14 +179,11 @@ function filterRowChangeData(d)
         }
         else
         {
-            logger.info("else condition")
             for (c = columns.size() - 1; c >= 0; c--) {
                 columnSpec = columns.get(c);
                 colName = columnSpec.getName();
-                logger.info("another isDrop caller place " + colName);
                 if (isDrop(schema, table, colName)) {
                     if (specToDrop.indexOf(c) < 0) {
-                        logger.info("else raj spec to drop " + c.toString() + " colname "+ colName);
                         specToDrop[specToDrop.length] = c;
                     }
                 }
@@ -212,7 +194,7 @@ function filterRowChangeData(d)
             for (var i = 0 ; i < specToDrop.length ; i++)
             {
                 columns.remove(specToDrop[i]);
-                logger.info("removing spec "  + specToDrop[i].toString());
+                logger.debug("removing spec "  + specToDrop[i].toString());
             }
 
             // Queue drop of the row change if we removed all columns (Issue 985).
@@ -230,7 +212,6 @@ function filterRowChangeData(d)
             {
                 keySpec = keys.get(c);
                 colName = keySpec.getName();
-                logger.info("isDrop caller  colName = "+ colName);
                 if (isDrop(schema,table,colName))
                 {
                     keyValues.get(r).remove(c);

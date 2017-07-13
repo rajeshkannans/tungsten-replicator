@@ -887,7 +887,7 @@ public class SimpleBatchApplier implements RawApplier
      * @see com.continuent.tungsten.replicator.plugin.ReplicatorPlugin#prepare(com.continuent.tungsten.replicator.plugin.PluginContext)
      */
     @Override
-    public void prepare(PluginContext conFtext) throws ReplicatorException,
+    public void prepare(PluginContext context) throws ReplicatorException,
             InterruptedException
     {
         // Find the data source.

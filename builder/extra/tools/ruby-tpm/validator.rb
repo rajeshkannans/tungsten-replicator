@@ -21,7 +21,7 @@ require 'system_require'
 system_require 'date'
 
 # Super class for property validators. 
-class hPropertyValidator
+class PropertyValidator
   def initialize(regex, message, ignore_blank_values = false) 
     @regex = Regexp.new(regex)
     @message = message
@@ -35,7 +35,7 @@ class hPropertyValidator
       return value
     end
     
-    raise PropertyValidatorException, @message + " val: "+ value, caller
+    raise PropertyValidatorException, @message, caller
   end
 end
 
