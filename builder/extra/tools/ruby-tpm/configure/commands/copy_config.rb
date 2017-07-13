@@ -31,7 +31,7 @@ class CopyConfigCommand
       hosts = hosts + @config.getPropertyOr([DATASERVICES, ds_alias, DATASERVICE_CONNECTORS], "").split(",")
     }
     
-    hosts.uniq!()
+    hoqsts.uniq!()
     hosts.delete_if{
       |host|
       (include_host?(host) != true)

@@ -520,7 +520,25 @@ replicator.datasources=global,extractor
 # Alias data source to allow filters and other components to refer to 
 # extractor. 
 replicator.datasource.extractor=com.continuent.tungsten.replicator.datasource.AliasDataSource
-replicator.datasource.extractor.dataSource=global
+
+replicator.datasource.extractor.createCatalog=true
+replicator.datasource.extractor.connectionSpec=com.continuent.tungsten.replicator.datasource.SqlConnectionSpecMySQL
+replicator.datasource.extractor.connectionSpec.host=
+replicator.datasource.extractor.connectionSpec.port=3306
+replicator.datasource.extractor.connectionSpec.user=
+replicator.datasource.extractor.connectionSpec.password=
+replicator.datasource.extractor.connectionSpec.schema=${replicator.schema}
+replicator.datasource.extractor.connectionSpec.sslEnabled=${replicator.global.db.sslEnabled}
+#replicator.datasource.extractor.connectionSpec.initScript=
+replicator.datasource.extractor.connectionSpec.urlOptions=noPrepStmtCache=true
+replicator.datasource.extractor.csvType=mysql
+replicator.datasource.extractor.csv=com.continuent.tungsten.common.csv.CsvSpecification
+replicator.datasource.extractor.csv.fieldSeparator=,
+replicator.datasource.extractor.csv.RecordSeparator=\\n
+replicator.datasource.extractor.csv.nullValue=\\N
+replicator.datasource.extractor.csv.useQuotes=true
+replicator.datasource.extractor.csvFormatter=com.continuent.tungsten.replicator.csv.DefaultCsvDataFormat
+
 
 @{include(REPL_SVC_APPLIER_DATASOURCE_CONFIG)}
 

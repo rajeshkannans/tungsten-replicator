@@ -43,7 +43,7 @@ CREATE SCHEMA "$table.getSchema()"##
 #stop
 #end
 
-DROP TABLE ##
+DROP TABLE  IF EXISTS ##
 "$table.getSchema()"."$table.getName()"##
 ;
 
@@ -115,7 +115,17 @@ CHAR(64) /* WARN: Converted BIT to CHAR */##
 #else
 $col.getTypeDescription() /* ERROR: unrecognized (type=$col.getType(), length=$col.getLength()) */##
 #end ## End of if-then-then...-else.
-#end ## End of column loop. 
+#end ## End of column loop.
+
+#if ( $table.getPrimaryKey() )
+, PRIMARY KEY ( ##
+  #foreach ( $key in $table.getPrimaryKey().getColumns() )
+  "$key.getName()"##
+    #if( $foreach.hasNext ), #else #end
+  #end
+    ) ENABLED
+#end
+
 ) ##
 
 #set ( $tryPkInclude = "${table.getSchema()}.${table.getName()}.pk" )

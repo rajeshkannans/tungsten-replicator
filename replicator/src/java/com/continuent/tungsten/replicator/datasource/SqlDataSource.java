@@ -148,11 +148,13 @@ public class SqlDataSource extends AbstractDataSource
 
         // Prepare commit seqno table. Channels must be set here as they
         // are unsafe to set earlier as the pipeline does not know the value.
-        commitSeqno = new SqlCommitSeqno(connectionManager,
-                connectionSpec.getSchema(), connectionSpec.getTableType());
-        commitSeqno.setChannels(channels);
-        commitSeqno.configure();
-        commitSeqno.prepare();
+        if(!getName().equalsIgnoreCase("extractor")) {
+            commitSeqno = new SqlCommitSeqno(connectionManager,
+                    connectionSpec.getSchema(), connectionSpec.getTableType());
+            commitSeqno.setChannels(channels);
+            commitSeqno.configure();
+            commitSeqno.prepare();
+        }
     }
 
     /**
@@ -273,32 +275,34 @@ public class SqlDataSource extends AbstractDataSource
                 }
 
                 // Create commit seqno table if it does not already exist.
-                commitSeqno.initialize();
+                if(commitSeqno != null) {
+                    commitSeqno.initialize();
 
-                // Create consistency table but only if it does not exist.
-                Table consistency = ConsistencyTable
-                        .getConsistencyTableDefinition(schema);
-                if (conn.findTungstenTable(consistency.getSchema(),
-                        consistency.getName()) == null)
-                {
-                    conn.createTable(consistency, false,
+
+                    // Create consistency table but only if it does not exist.
+                    Table consistency = ConsistencyTable
+                            .getConsistencyTableDefinition(schema);
+                    if (conn.findTungstenTable(consistency.getSchema(),
+                            consistency.getName()) == null) {
+                        conn.createTable(consistency, false,
+                                connectionSpec.getTableType());
+                    }
+
+                    // Create heartbeat table if it does not exist.
+                    HeartbeatTable heartbeatTable = new HeartbeatTable(schema,
+                            connectionSpec.getTableType(), serviceName);
+                    heartbeatTable.initializeHeartbeatTable(conn);
+
+                    // Create shard table if it does not exist
+                    ShardTable shardTable = new ShardTable(schema,
                             connectionSpec.getTableType());
+                    shardTable.initializeShardTable(conn);
+
+                    // Create channel table.
+                    channelTable = new ShardChannelTable(schema,
+                            connectionSpec.getTableType());
+                    channelTable.initializeShardTable(conn, this.channels);
                 }
-
-                // Create heartbeat table if it does not exist.
-                HeartbeatTable heartbeatTable = new HeartbeatTable(schema,
-                        connectionSpec.getTableType(), serviceName);
-                heartbeatTable.initializeHeartbeatTable(conn);
-
-                // Create shard table if it does not exist
-                ShardTable shardTable = new ShardTable(schema,
-                        connectionSpec.getTableType());
-                shardTable.initializeShardTable(conn);
-
-                // Create channel table.
-                channelTable = new ShardChannelTable(schema,
-                        connectionSpec.getTableType());
-                channelTable.initializeShardTable(conn, this.channels);
             }
             catch (SQLException e)
             {
@@ -383,7 +387,10 @@ public class SqlDataSource extends AbstractDataSource
             try
             {
                 // Drop commit_seqno position.
-                commitSeqno.clear();
+                if(commitSeqno != null)
+                {
+                    commitSeqno.clear();
+                }
 
                 // Drop remaining tables, explicitly suppressing logging so that
                 // changes do not accidentally replicate.

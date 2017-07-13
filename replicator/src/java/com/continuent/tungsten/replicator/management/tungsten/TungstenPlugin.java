@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 
 import javax.management.NotificationBroadcasterSupport;
 
+import com.continuent.tungsten.replicator.datasource.DataSourceService;
 import org.apache.log4j.Logger;
 
 import com.continuent.tungsten.common.cluster.resource.OpenReplicatorParams;
@@ -737,7 +738,7 @@ public class TungstenPlugin extends NotificationBroadcasterSupport
             return false;
         else
         {
-            UniversalDataSource uds = runtime.getDataSource("extractor");
+            UniversalDataSource uds = runtime.getDataSource(DataSourceService.GLOBAL);
             if (uds instanceof SqlDataSource)
             {
                 SqlDataSource dataSource = (SqlDataSource) uds;

@@ -74,7 +74,7 @@
 		</fileset>
     </path>
 
-    <target name="all" depends="clean,test, releases"
+    <target name="all" depends="clean, releases"
             description="--> test code and create releases"/>
 
 	<target name="allExceptJunit" depends="clean,compile, releases"

@@ -2137,9 +2137,11 @@ class HostServiceControlType < ConfigurePrompt
     if service == nil
       # Catch instances where `service` is not in $PATH
       begin
-        service = cmd_result("ls /sbin/service")
+        service = cmd_result("ls /usr/sbin/service")
       rescue CommandError
         service = nil
+        puts
+
       end
     end
     
@@ -2148,7 +2150,9 @@ class HostServiceControlType < ConfigurePrompt
     elsif service != nil
       @default = INITD
     end
+    @default = @default.uniq().sort()
   end
+
 end
 
 class HostPortsForUsers < ConfigurePrompt

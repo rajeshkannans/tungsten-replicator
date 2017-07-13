@@ -826,9 +826,14 @@ public abstract class AbstractDatabase implements Database
     {
         this.autoCommit = autoCommit;
         if (logger.isDebugEnabled())
+        {
             logger.debug("setAutoCommit = " + autoCommit);
+        }
         if (dbConn.getAutoCommit() != autoCommit)
+        {
+            logger.debug("Actually setting setAutoCommit = " + autoCommit);
             dbConn.setAutoCommit(autoCommit);
+        }
     }
 
     @Override

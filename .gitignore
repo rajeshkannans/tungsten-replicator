@@ -3,3 +3,7 @@
 RemoteSystemsTempFiles
 .metadata
 .recommenders
+.idea
+.idea/*
+*/.idea/*
+*/.iml

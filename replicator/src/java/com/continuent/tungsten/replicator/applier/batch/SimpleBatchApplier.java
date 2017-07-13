@@ -21,7 +21,10 @@
 package com.continuent.tungsten.replicator.applier.batch;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -380,10 +383,10 @@ public class SimpleBatchApplier implements RawApplier
         {
             if (dbmsData instanceof StatementData)
             {
-                if (logger.isDebugEnabled())
+                if (logger.isInfoEnabled())
                 {
                     StatementData stmtData = (StatementData) dbmsData;
-                    logger.debug("Ignoring statement: " + stmtData.getQuery());
+                    logger.info("Ignoring statement: " + stmtData.getQuery());
                 }
             }
             else if (dbmsData instanceof RowChangeData)
@@ -610,6 +613,9 @@ public class SimpleBatchApplier implements RawApplier
     @Override
     public void commit() throws ReplicatorException, InterruptedException
     {
+
+        disableAutoCommit();
+
         // If we don't have a last header, there is nothing to be done.
         if (latestHeader == null)
         {
@@ -689,9 +695,17 @@ public class SimpleBatchApplier implements RawApplier
                         ScriptMethodRequest request = response.getRequest();
                         Throwable rootCause = response.getThrowable();
                         CsvInfo info = (CsvInfo) request.getArgument();
+                        File rejectedFileCopy = new File(info.file.getAbsolutePath()+"rejected_"+ System.currentTimeMillis()+".csv");
+                        try {
+                            copyFileUsingChannel(info.file, rejectedFileCopy);
+                        }
+                        catch (IOException e) {
+                            logger.warn("copying load rejected file failed", e);
+                        }
                         String message = "CSV loading failed: schema="
                                 + info.schema + " table=" + info.table
                                 + " CSV file=" + info.file.getAbsolutePath()
+                                + " Copied to location =" + rejectedFileCopy.getAbsolutePath()
                                 + " message=" + rootCause.getMessage();
                         throw new ReplicatorException(message, rootCause);
                     }
@@ -873,7 +887,7 @@ public class SimpleBatchApplier implements RawApplier
      * @see com.continuent.tungsten.replicator.plugin.ReplicatorPlugin#prepare(com.continuent.tungsten.replicator.plugin.PluginContext)
      */
     @Override
-    public void prepare(PluginContext context) throws ReplicatorException,
+    public void prepare(PluginContext conFtext) throws ReplicatorException,
             InterruptedException
     {
         // Find the data source.
@@ -943,18 +957,7 @@ public class SimpleBatchApplier implements RawApplier
         latestHeader = commitSeqnoAccessor.lastCommitSeqno();
 
         // Ensure we are not in auto-commit mode.
-        try
-        {
-            for (UniversalConnection conn : connections)
-            {
-                conn.setAutoCommit(false);
-            }
-        }
-        catch (Exception e)
-        {
-            throw new ReplicatorException(
-                    "Unable to start transaction: message=" + e.getMessage(), e);
-        }
+        disableAutoCommit();
 
         // Initialize load script.
         logger.info("Initializing load script: name=" + loadScript
@@ -1112,6 +1115,22 @@ public class SimpleBatchApplier implements RawApplier
                                 + partitionByClass + " message="
                                 + e.getMessage(), e);
             }
+        }
+    }
+
+    private void disableAutoCommit() throws ReplicatorException
+    {
+        try
+        {
+            for (UniversalConnection conn : connections)
+            {
+                conn.setAutoCommit(false);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new ReplicatorException(
+                    "Unable to start transaction: message=" + e.getMessage(), e);
         }
     }
 
@@ -1526,4 +1545,16 @@ public class SimpleBatchApplier implements RawApplier
         }
     }
 
+    private static void copyFileUsingChannel(File source, File dest) throws IOException {
+        FileChannel sourceChannel = null;
+        FileChannel destChannel = null;
+        try {
+            sourceChannel = new FileInputStream(source).getChannel();
+            destChannel = new FileOutputStream(dest).getChannel();
+            destChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
+        }finally{
+            sourceChannel.close();
+            destChannel.close();
+        }
+    }
 }

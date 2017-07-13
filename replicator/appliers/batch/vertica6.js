@@ -27,7 +27,7 @@
 function prepare()
 {
   // Ensure we are using the correct timezone.
-  sql.execute("SET timezone TO 'UTC'");
+  sql.execute("SET timezone TO 'Asia/Kolkata'");
 }
 
 // Called at start of batch transaction.
@@ -58,7 +58,7 @@ function apply(csvinfo)
   csv_file = csvinfo.file.getAbsolutePath();
   schema = csvinfo.schema;
   table = csvinfo.table;
-  exc_file = runtime.sprintf('/tmp/tungsten_vertica_%s.%s.exceptions',schema,table);
+  exc_file = runtime.sprintf('/vertica/tungsten_others/vertica_load_exceptions/tungsten_vertica_%s.%s.exceptions',schema,table);
   seqno = csvinfo.startSeqno;
   key = csvinfo.key;
   stage_table_fqn = csvinfo.getStageTableFQN();
@@ -85,7 +85,7 @@ function apply(csvinfo)
 
   // Create and execute copy command.
   copy_sql = runtime.sprintf(
-    "COPY %s FROM '%s' DIRECT NULL 'null' DELIMITER ',' ENCLOSED BY '\"' EXCEPTIONS '%s'",
+    "COPY %s FROM  LOCAL '%s' DIRECT NULL 'null' DELIMITER ',' ENCLOSED BY '\"' EXCEPTIONS '%s' NO COMMIT ",
     stage_table_fqn,
     csv_file,
     exc_file
@@ -124,7 +124,7 @@ function apply(csvinfo)
     base_columns,
     stage_table_fqn,
     stage_table_fqn,
-    pkey_columns
+    '"' + pkey_columns.replace(',', '","') + '"'
   );
   logger.info("INSERT: " + insert_sql);
   sql.execute(insert_sql);
