@@ -109,4 +109,12 @@ public class SimpleJobService<V>
     {
         pool.shutdownNow();
     }
+
+    /**
+     * Checks if the job service is already down
+     * @return
+     */
+    public boolean isShutdown() {
+        return pool.isShutdown();
+    }
 }

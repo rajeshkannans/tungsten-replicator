@@ -180,4 +180,8 @@ public class ScriptExecutorService
     {
         jobService.shutdownNow();
     }
+
+    public boolean isShutdown() {
+        return jobService.isShutdown();
+    }
 }

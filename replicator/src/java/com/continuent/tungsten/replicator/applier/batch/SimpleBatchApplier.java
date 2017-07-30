@@ -216,6 +216,9 @@ public class SimpleBatchApplier implements RawApplier
 
     private SchemaTableFilter           filter              = null;
 
+
+    Runnable rollbackListener = null;
+
     public void setDataSource(String dataSource)
     {
         this.dataSource = dataSource;
@@ -674,6 +677,15 @@ public class SimpleBatchApplier implements RawApplier
         // failed task and log the error properly.
         try
         {
+            rollbackListener = new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    execService.shutdownNow();
+                }
+            };
+
             boolean succeeded = execService.process();
             if (succeeded)
             {
@@ -714,7 +726,12 @@ public class SimpleBatchApplier implements RawApplier
         }
         finally
         {
-            execService.shutdownNow();
+            rollbackListener = null;
+
+            if(!execService.isShutdown())
+            {
+                execService.shutdownNow();
+            }
         }
 
         // Ensure that the number of files loaded matches the number of files we
@@ -794,8 +811,11 @@ public class SimpleBatchApplier implements RawApplier
         {
             try
             {
+                if(rollbackListener != null)
+                {
+                    rollbackListener.run();
+                }
                 conn.rollback();
-                conn.setAutoCommit(true);
             }
             catch (Exception e)
             {
@@ -950,8 +970,15 @@ public class SimpleBatchApplier implements RawApplier
 
         // Prepare accessor(s) to data.
         CommitSeqno commitSeqno = dataSourceImpl.getCommitSeqno();
-        commitSeqnoAccessor = commitSeqno.createAccessor(taskId,
-                connections.get(0));
+        UniversalConnection connForCommitAccessor = dataSourceImpl.getConnection();
+        try {
+            connForCommitAccessor.setAutoCommit(true);
+        }
+        catch (Exception e) {
+            throw new ReplicatorException("Unable to set autocommit true to database connection", e);
+        }
+        commitSeqnoAccessor = commitSeqno.createAccessor(taskId,connForCommitAccessor );
+
 
         // Fetch the last event.
         latestHeader = commitSeqnoAccessor.lastCommitSeqno();
