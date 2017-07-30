@@ -695,7 +695,7 @@ public class SimpleBatchApplier implements RawApplier
                         ScriptMethodRequest request = response.getRequest();
                         Throwable rootCause = response.getThrowable();
                         CsvInfo info = (CsvInfo) request.getArgument();
-                        File rejectedFileCopy = new File(info.file.getAbsolutePath()+"rejected_"+ System.currentTimeMillis()+".csv");
+                        File rejectedFileCopy = new File(stageDirectory , "rejected_"+ info.file.getName() + "_" +System.currentTimeMillis()+".csv");
                         try {
                             copyFileUsingChannel(info.file, rejectedFileCopy);
                         }
