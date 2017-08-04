@@ -543,4 +543,26 @@ public interface OpenReplicatorManagerMBean
      * @see OpenReplicatorManager#online2(Map)
      */
     public void provisionOnline(Map<String, String> map) throws Exception;
+
+    /* Added below MBean attributes, because jmx-trans does not support querying
+    * metrics from JMX operations (@{status})
+    * */
+     double getUptimeSeconds();
+
+     double getAppliedLatency() throws Exception;
+
+     double appliedLastSeqno()  throws Exception;
+
+     long getLatestEpochNumber()  throws Exception;
+
+     long getMaximumStoredSeqNo()  throws Exception;
+
+     long getMinimumStoredSeqNo()  throws Exception;
+
+     long getResourcePrecedence()  throws Exception;
+
+     int getRmiPort();
+
+     double getTimeInStateSeconds();
+
 }

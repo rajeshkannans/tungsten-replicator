@@ -209,6 +209,8 @@ public class SimpleBatchApplier implements RawApplier
     // Catalog information.
     protected UniversalDataSource       dataSourceImpl      = null;
     protected List<UniversalConnection> connections         = null;
+
+    private UniversalConnection connectionForCommitSeqno = null;
     protected CommitSeqnoAccessor       commitSeqnoAccessor = null;
 
     // Old catalog tables.
@@ -656,7 +658,7 @@ public class SimpleBatchApplier implements RawApplier
         // unique file names that associate easily with the trep_commit_seqno
         // position.
         long endSeqno = latestHeader.getSeqno();
-        ScriptExecutorService execService = new ScriptExecutorService(
+        final ScriptExecutorService execService = new ScriptExecutorService(
                 "batch-load", loadScriptExecutors, Math.max(1, pendingCsvCount));
         for (CsvFileSet fileSet : this.openCsvSets.values())
         {
@@ -970,14 +972,14 @@ public class SimpleBatchApplier implements RawApplier
 
         // Prepare accessor(s) to data.
         CommitSeqno commitSeqno = dataSourceImpl.getCommitSeqno();
-        UniversalConnection connForCommitAccessor = dataSourceImpl.getConnection();
+        connectionForCommitSeqno = dataSourceImpl.getConnection();
         try {
-            connForCommitAccessor.setAutoCommit(true);
+            connectionForCommitSeqno.setAutoCommit(true);
         }
         catch (Exception e) {
             throw new ReplicatorException("Unable to set autocommit true to database connection", e);
         }
-        commitSeqnoAccessor = commitSeqno.createAccessor(taskId,connForCommitAccessor );
+        commitSeqnoAccessor = commitSeqno.createAccessor(taskId, connectionForCommitSeqno );
 
 
         // Fetch the last event.
@@ -1233,6 +1235,12 @@ public class SimpleBatchApplier implements RawApplier
             }
             connections = null;
         }
+        if(connectionForCommitSeqno != null)
+        {
+            connectionForCommitSeqno.close();
+            connectionForCommitSeqno = null;
+        }
+
     }
 
     /**

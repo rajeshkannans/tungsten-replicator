@@ -3406,4 +3406,42 @@ public class OpenReplicatorManager extends NotificationBroadcasterSupport
         }
 
     }
+
+
+
+    @Override
+    public double getAppliedLatency() throws Exception
+    {
+        return Double.valueOf(status().get(Replicator.APPLIED_LATENCY));
+    }
+
+    @Override
+    public double appliedLastSeqno() throws Exception
+    {
+        return Long.valueOf(status().get(Replicator.APPLIED_LAST_SEQNO));
+    }
+
+    @Override
+    public long getLatestEpochNumber() throws Exception
+    {
+        return Long.valueOf(status().get(Replicator.LATEST_EPOCH_NUMBER));
+    }
+
+    @Override
+    public long getMaximumStoredSeqNo() throws Exception
+    {
+        return Long.valueOf(status().get(Replicator.MAX_STORED_SEQNO));
+    }
+
+    @Override
+    public long getMinimumStoredSeqNo() throws Exception
+    {
+        return Long.valueOf(status().get(Replicator.MIN_STORED_SEQNO));
+    }
+
+    @Override
+    public long getResourcePrecedence() throws Exception
+    {
+        return Long.valueOf(status().get(Replicator.RESOURCE_PRECEDENCE));
+    }
 }
