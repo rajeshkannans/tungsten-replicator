@@ -551,6 +551,8 @@ public interface OpenReplicatorManagerMBean
 
      double getAppliedLatency() throws Exception;
 
+     double getRelativeLatency() throws Exception;
+
      double appliedLastSeqno()  throws Exception;
 
      long getLatestEpochNumber()  throws Exception;
@@ -565,4 +567,5 @@ public interface OpenReplicatorManagerMBean
 
      double getTimeInStateSeconds();
 
+     int getStateCode();
 }

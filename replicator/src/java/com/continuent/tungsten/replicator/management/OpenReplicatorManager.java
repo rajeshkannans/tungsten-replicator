@@ -3416,6 +3416,12 @@ public class OpenReplicatorManager extends NotificationBroadcasterSupport
     }
 
     @Override
+    public double getRelativeLatency() throws Exception
+    {
+        return Double.valueOf(status().get(Replicator.RELATIVE_LATENCY));
+    }
+
+    @Override
     public double appliedLastSeqno() throws Exception
     {
         return Long.valueOf(status().get(Replicator.APPLIED_LAST_SEQNO));
@@ -3443,5 +3449,11 @@ public class OpenReplicatorManager extends NotificationBroadcasterSupport
     public long getResourcePrecedence() throws Exception
     {
         return Long.valueOf(status().get(Replicator.RESOURCE_PRECEDENCE));
+    }
+
+    @Override
+    public int getStateCode()
+    {
+        return getState().equals("OFFLINE:ERROR") ? 0 : 1;
     }
 }
